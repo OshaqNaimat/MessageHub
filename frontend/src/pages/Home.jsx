@@ -143,7 +143,7 @@ export default function WhatsAppRegister() {
               marginTop: 4,
             }}
           >
-            Join WhatsApp today
+            Join MessageHub today
           </p>
         </div>
 
