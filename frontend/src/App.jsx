@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
 import MainPage from "./pages/MainPage";
+import OTPVerification from "./pages/OTPVerification";
 const App = () => {
   return (
     <>
@@ -11,6 +12,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/main-page" element={<MainPage />} />
+          <Route path="/OTPVerification" element={<OTPVerification />} />
         </Routes>
       </Router>
     </>

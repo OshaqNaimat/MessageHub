@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 export default function WhatsAppRegister() {
   const [formFields, setFormFields] = useState({
     name: "",
@@ -18,6 +19,8 @@ export default function WhatsAppRegister() {
     });
   };
 
+  const navigate = useNavigate();
+
   const handleRegister = async (e) => {
     e.preventDefault();
     const registerData = {
@@ -28,10 +31,10 @@ export default function WhatsAppRegister() {
     };
 
     const response = await axios.post(
-      "http:localhost:6000/api/auth/register",
+      "http://localhost:5174/api/auth/register",
       registerData,
     );
-    console.log(response);
+    navigate("/OTPVerification");
   };
 
   return (
@@ -211,6 +214,7 @@ export default function WhatsAppRegister() {
             </div>
 
             <button
+              onClick={handleRegister}
               className="submit-btn w-full text-white font-bold py-4 rounded-xl text-base mt-2"
               style={{ letterSpacing: "0.5px" }}
             >

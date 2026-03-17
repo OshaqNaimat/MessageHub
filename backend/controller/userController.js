@@ -193,7 +193,7 @@ export const verifyOTP = async (req, res) => {
 
   if (!otp || !email) {
     res.status(401);
-    throw new Error("Please Enter Valid data");
+    throw new Error("Please Enter OTP");
   }
 
   const findUser = await User.findOne({
