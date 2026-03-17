@@ -8,6 +8,10 @@ import cors from "cors";
 
 dotenv.config();
 
+// For ESM (import syntax)
+import dns from "node:dns/promises";
+dns.setServers(["1.1.1.1", "1.0.0.1", "8.8.8.8"]);
+
 const app = express();
 const PORT = process.env.PORT || 5174;
 
