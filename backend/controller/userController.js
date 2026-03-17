@@ -185,3 +185,34 @@ export const registerUser = async (req, res) => {
 
   res.send(createdUser);
 };
+
+// verify the otp
+
+export const verifyOTP = async (req, res) => {
+  const { otp, email } = req.body;
+
+  if (!otp || !email) {
+    res.status(401);
+    throw new Error("Please Enter Valid data");
+  }
+
+  const findUser = await User.findOne({
+    email,
+  });
+
+  if (!findUser) {
+    res.status(404);
+    throw new Error("Invalid Email");
+  }
+
+  if (findUser.otp == otp) {
+    findUser.emailVerified = true;
+    findUser.otp = null;
+    await findUser.save();
+  } else {
+    res.status(401);
+    throw new Error("Invalid OTP");
+  }
+
+  res.send(findUser);
+};
