@@ -40,12 +40,6 @@ export const registerUser = async (req, res) => {
 
   //  make mail options
 
-  // Before building mailOptions, split the OTP:
-  // const otpDigits = String(myOTP)
-  //   .split("")
-  //   .map((d) => `<div class="otp-digit">${d}</div>`)
-  //   .join("");
-
   const mailOptions = {
     from: "oshaqnaimat3@gmail.com",
     to: email,
@@ -76,22 +70,18 @@ export const registerUser = async (req, res) => {
    <div style="
   width:36px;
   height:36px;
-  background:linear-gradient(135deg,#22c55e,#10b981);
-  border-radius:10px;
-  display:inline-flex;
+  display:flex;
   align-items:center;
   justify-content:center;
   color:white
 ">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
+ <img src="https://cdn-icons-png.flaticon.com/512/12149/12149987.png"/>
 </div>
-    <span style="font-family:Georgia, serif; font-size:18px;margin:0;">MessageHub</span>
+    <span style=" font-family: Arial, Helvetica, sans-serif;; font-size:18px;margin:0;display:flex;align-items:center;">MessageHub</span>
   </div>
 
   <h1 style="font-size:26px; margin-top:20px; margin-bottom:10px;">
-    <strong style="color:#4ade80;">verification</strong><br>
+    <strong style="color:#4ade80;">Verification</strong><br>
     code 
   </h1>
 
@@ -179,19 +169,19 @@ export const registerUser = async (req, res) => {
 
   transporter.sendMail(mailOptions, (err, info) => {
     try {
-      console.log("mail send");
+      console.log("mail sent");
     } catch (error) {
       console.log(error);
     }
   });
 
-  // const createdUser = await User.create({
-  //   name,
-  //   email,
-  //   password: hashPassword,
-  //   number,
-  //   otp: myOTP,
-  // });
+  const createdUser = await User.create({
+    name,
+    email,
+    password: hashPassword,
+    number,
+    otp: myOTP,
+  });
 
-  // res.send(createdUser);
+  res.send(createdUser);
 };
