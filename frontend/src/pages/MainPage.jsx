@@ -4,7 +4,7 @@ import { FaRegSquarePlus } from "react-icons/fa6";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { IoSearch } from "react-icons/io5";
 import SearchBar from "../components/SearchBar";
-import SideBar from "../components/Sidebar";
+import SideBar from "../components/SideBar";
 
 const MainPage = () => {
   const [Green, setGreen] = useState(false);
