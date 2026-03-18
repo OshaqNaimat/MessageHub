@@ -34,7 +34,9 @@ export default function WhatsAppRegister() {
       "http://localhost:5174/api/auth/register",
       registerData,
     );
+    localStorage.setItem("user", JSON.stringify(response.data));
     navigate("/OTPVerification");
+    console.log("SignIn", response.data);
   };
 
   return (
@@ -230,6 +232,7 @@ export default function WhatsAppRegister() {
         >
           Already have an account?{" "}
           <span
+            onClick={() => navigate("/")}
             style={{ color: "#25D366", cursor: "pointer", fontWeight: 600 }}
           >
             Sign In

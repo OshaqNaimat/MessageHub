@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { FaArrowLeft } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
 export default function OTPVerification() {
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [verified, setVerified] = useState(false);
   const [countdown, setCountdown] = useState(30);
-  const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef([]);
   const timerRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     inputRefs.current[0]?.focus();
@@ -19,33 +21,30 @@ export default function OTPVerification() {
   const startTimer = () => {
     clearInterval(timerRef.current);
     setCountdown(30);
-    setCanResend(false);
     let t = 30;
     timerRef.current = setInterval(() => {
       t--;
       setCountdown(t);
-      if (t <= 0) {
-        clearInterval(timerRef.current);
-        setCanResend(true);
-      }
+      if (t <= 0) clearInterval(timerRef.current);
     }, 1000);
   };
 
   const handleChange = (e, idx) => {
     const val = e.target.value.replace(/\D/g, "");
     if (!val && e.nativeEvent.inputType !== "deleteContentBackward") return;
-    const newOtp = [...otp];
+    const newOtp = otp.split("");
+    while (newOtp.length < 4) newOtp.push("");
     newOtp[idx] = val ? val[0] : "";
-    setOtp(newOtp);
+    setOtp(newOtp.join(""));
     setError("");
     if (val && idx < 3) inputRefs.current[idx + 1]?.focus();
   };
 
   const handleKeyDown = (e, idx) => {
     if (e.key === "Backspace" && !otp[idx] && idx > 0) {
-      const newOtp = [...otp];
+      const newOtp = otp.split("");
       newOtp[idx - 1] = "";
-      setOtp(newOtp);
+      setOtp(newOtp.join(""));
       inputRefs.current[idx - 1]?.focus();
     }
   };
@@ -57,43 +56,29 @@ export default function OTPVerification() {
       .replace(/\D/g, "")
       .slice(0, 4);
     if (!paste) return;
-    const newOtp = ["", "", "", ""];
-    paste.split("").forEach((ch, i) => {
-      newOtp[i] = ch;
-    });
-    setOtp(newOtp);
+    setOtp(paste.padEnd(4, "").slice(0, 4));
     inputRefs.current[Math.min(paste.length, 3)]?.focus();
   };
 
+  const convertedData = JSON.parse(localStorage.getItem("user") || "{}");
+  const email = convertedData?.email || "";
+
   const handleVerify = async () => {
-    const code = otp.join("");
-    if (code.length < 4) {
+    if (otp.length < 4) {
       setError("Please enter all 4 digits.");
       return;
     }
     try {
       const response = await axios.post(
-        "http://localhost:6000/api/auth/verify-otp",
-        { otp: code },
+        "http://localhost:5174/api/auth/otp-verification",
+        { otp, email },
       );
       console.log(response);
       setVerified(true);
     } catch (err) {
       setError("Incorrect code. Please try again.");
-      setOtp(["", "", "", ""]);
+      setOtp("");
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
-    }
-  };
-
-  const handleResend = async () => {
-    try {
-      await axios.post("http://localhost:6000/api/auth/resend-otp");
-      setOtp(["", "", "", ""]);
-      setError("");
-      startTimer();
-      inputRefs.current[0]?.focus();
-    } catch (err) {
-      setError("Failed to resend. Try again.");
     }
   };
 
@@ -164,6 +149,7 @@ export default function OTPVerification() {
           background: linear-gradient(135deg, #25D366, #128C7E);
           transition: all 0.3s ease;
           animation: glow 2.5s ease-in-out infinite;
+          cursor: pointer;
         }
         .verify-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37,211,102,0.4); }
         .verify-btn:active { transform: translateY(0); }
@@ -181,6 +167,13 @@ export default function OTPVerification() {
           boxShadow: "0 32px 80px rgba(0,0,0,0.5)",
         }}
       >
+        {/* Back Arrow */}
+        <div className="text-white mb-4" onClick={() => navigate("/")}>
+          <span className="[background:linear-gradient(135deg,#25D366,#128C7E)] [background-clip:text] [-webkit-background-clip:text] [color:transparent] inline-flex cursor-pointer transition-all duration-300 hover:-translate-y-0.5 [filter:drop-shadow(0_0_6px_rgba(37,211,102,0.5))] hover:[filter:drop-shadow(0_0_12px_rgba(37,211,102,0.7))]">
+            <FaArrowLeft />
+          </span>
+        </div>
+
         {!verified ? (
           <>
             {/* Header */}
@@ -231,14 +224,14 @@ export default function OTPVerification() {
 
             {/* Dot indicators */}
             <div className="flex justify-center gap-2 mb-6">
-              {otp.map((val, i) => (
+              {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
                   style={{
                     width: 8,
                     height: 8,
                     borderRadius: "50%",
-                    background: val ? "#25D366" : "rgba(37,211,102,0.2)",
+                    background: otp[i] ? "#25D366" : "rgba(37,211,102,0.2)",
                     transition: "background 0.3s ease",
                   }}
                 />
@@ -247,15 +240,15 @@ export default function OTPVerification() {
 
             {/* OTP Inputs */}
             <div className="flex justify-center gap-3 mb-2">
-              {otp.map((val, idx) => (
+              {[0, 1, 2, 3].map((idx) => (
                 <input
                   key={idx}
                   ref={(el) => (inputRefs.current[idx] = el)}
-                  className={`otp-input-box ${val ? "filled" : ""} ${error ? "error" : ""}`}
+                  className={`otp-input-box ${otp[idx] ? "filled" : ""} ${error ? "error" : ""}`}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
-                  value={val}
+                  value={otp[idx] || ""}
                   placeholder="—"
                   onChange={(e) => handleChange(e, idx)}
                   onKeyDown={(e) => handleKeyDown(e, idx)}
@@ -285,49 +278,6 @@ export default function OTPVerification() {
             >
               Verify & Continue
             </button>
-
-            {/* Timer / Resend */}
-            <div className="flex items-center justify-center gap-2 mt-4">
-              {!canResend ? (
-                <>
-                  <span
-                    style={{ color: "rgba(255,255,255,0.35)", fontSize: 13 }}
-                  >
-                    Resend code in
-                  </span>
-                  <span
-                    style={{ color: "rgba(255,255,255,0.35)", fontSize: 13 }}
-                  >
-                    0:{countdown < 10 ? `0${countdown}` : countdown}
-                  </span>
-                </>
-              ) : (
-                <button
-                  onClick={handleResend}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#25D366",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  Resend OTP
-                </button>
-              )}
-            </div>
-
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: 14,
-                color: "rgba(255,255,255,0.25)",
-                fontSize: 11,
-              }}
-            >
-              Didn't receive it? Check your SMS inbox
-            </p>
           </>
         ) : (
           /* Success State */
