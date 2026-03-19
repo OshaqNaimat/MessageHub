@@ -155,7 +155,7 @@ const MainPage = () => {
 
         {/* Filter Tabs */}
         <div
-          className="flex gap-2 px-3 pb-2 overflow-x-auto scrollbar-hide"
+          className="flex gap-2 px-3 pb-2 overflow-x-auto scrollHide"
           style={{ background: t.bg }}
         >
           {FILTERS.map((filter) => (
@@ -186,22 +186,20 @@ const MainPage = () => {
         <div className="flex-1 overflow-y-auto scrollHide">
           {chats.map((chat) => (
             <div
-              key={chat.id}
+              key={chat._id}
               onClick={() => handleSelectChat(chat)}
-              className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors"
+              className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors my-1 rounded-md"
               style={{
                 borderBottom: `1px solid ${t.border}`,
-                // ✅ highlight the active chat on desktop
-                background:
-                  selectedChat?.id === chat.id ? t.hoverBg : "transparent",
+                background: selectedChat?._id === chat._id ? t.hoverBg : t.bg,
               }}
               onMouseEnter={(e) => {
-                if (selectedChat?.id !== chat.id)
+                if (selectedChat?._id !== chat._id)
                   e.currentTarget.style.background = t.hoverBg;
               }}
               onMouseLeave={(e) => {
-                if (selectedChat?.id !== chat.id)
-                  e.currentTarget.style.background = "transparent";
+                if (selectedChat?._id !== chat._id)
+                  e.currentTarget.style.background = t.bg;
               }}
             >
               {/* Avatar + online dot */}
@@ -232,14 +230,12 @@ const MainPage = () => {
                     className="text-xs flex-shrink-0 ml-2"
                     style={{ color: chat.unread > 0 ? "#25D366" : t.subtext }}
                   >
-                    {chat.time}
-                    Time
+                    {chat.time ?? ""}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-0.5">
                   <p className="text-sm truncate" style={{ color: t.subtext }}>
-                    {chat.lastMessage}
-                    last messege
+                    {chat.lastMessage ?? "Last Message"}
                   </p>
                   {chat.unread > 0 && (
                     <span
@@ -247,7 +243,6 @@ const MainPage = () => {
                       style={{ background: "#25D366" }}
                     >
                       {chat.unread}
-                      unread
                     </span>
                   )}
                 </div>
