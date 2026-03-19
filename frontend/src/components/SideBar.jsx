@@ -3,47 +3,49 @@ import { BsFillChatLeftTextFill } from "react-icons/bs";
 import { HiStatusOnline } from "react-icons/hi";
 import { IoLogOut, IoPeople, IoPersonCircle } from "react-icons/io5";
 
-const SideBar = () => {
+const NAV_ITEMS = [
+  { icon: <BsFillChatLeftTextFill size={23} />, label: "Chats" },
+  { icon: <HiStatusOnline size={23} />, label: "Status" },
+  { icon: <IoPeople size={23} />, label: "People" },
+  { icon: <IoLogOut size={23} />, label: "Logout" },
+  { icon: <IoPersonCircle size={23} />, label: "Profile" },
+];
+
+const SideBar = ({ t }) => {
   return (
-    <>
-      <div className="col-span-1 bg-[#1D1F1F] ">
-        <div className="flex flex-col text-white p-5 items-center justify-between gap-4">
-          <div className="relative group hover:bg-[#282929] flex items-center justify-center rounded-full h-10 w-10 cursor-pointer">
-            <BsFillChatLeftTextFill size={23} />
-            <span className="absolute left-full ml-3 px-2 py-1 bg-[#282929] text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-              Chats
-            </span>
-          </div>
-
-          <div className="relative group hover:bg-[#282929] flex items-center justify-center rounded-full h-10 w-10 cursor-pointer">
-            <HiStatusOnline size={23} />
-            <span className="absolute left-full ml-3 px-2 py-1 bg-[#282929] text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-              Status
-            </span>
-          </div>
-
-          <div className="relative group hover:bg-[#282929] flex items-center justify-center rounded-full h-10 w-10 cursor-pointer">
-            <IoPeople size={23} />
-            <span className="absolute left-full ml-3 px-2 py-1 bg-[#282929] text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-              People
-            </span>
-          </div>
-
-          <div className="relative group hover:bg-[#282929] flex items-center justify-center rounded-full h-10 w-10 cursor-pointer">
-            <IoLogOut size={23} />
-            <span className="absolute left-full ml-3 px-2 py-1 bg-[#282929] text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-              Logout
-            </span>
-          </div>
-          <div className="relative group hover:bg-[#282929] flex items-center justify-center rounded-full h-10 w-10 cursor-pointer">
-            <IoPersonCircle size={23} />
-            <span className="absolute left-full ml-3 px-2 py-1 bg-[#282929] text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-              Profile
-            </span>
-          </div>
+    <div
+      className="flex flex-col items-center py-5 px-2 gap-4 w-full transition-colors duration-300"
+      style={{
+        background: t?.panel ?? "#1D1F1F",
+        borderRight: `1px solid ${t?.border ?? "#2A3942"}`,
+      }}
+    >
+      {NAV_ITEMS.map(({ icon, label }) => (
+        <div
+          key={label}
+          className="relative group flex items-center justify-center rounded-full h-10 w-10 cursor-pointer transition-colors duration-200"
+          style={{ color: t?.icon ?? "#FFFFFF" }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.background = t?.hoverBg ?? "#282929")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.background = "transparent")
+          }
+        >
+          {icon}
+          {/* Tooltip */}
+          <span
+            className="absolute left-full ml-3 px-2 py-1 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50"
+            style={{
+              background: t?.hoverBg ?? "#282929",
+              color: t?.text ?? "#FFFFFF",
+            }}
+          >
+            {label}
+          </span>
         </div>
-      </div>
-    </>
+      ))}
+    </div>
   );
 };
 

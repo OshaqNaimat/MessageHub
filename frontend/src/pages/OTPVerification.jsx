@@ -93,11 +93,9 @@ export default function OTPVerification() {
       );
 
       console.log("SUCCESS RESPONSE:", response.data); // 🔍 DEBUG
-
-      setVerified(true);
-      navigate("/MainPage");
-
       localStorage.setItem("user", JSON.stringify(response.data));
+      setVerified(true);
+      setTimeout(() => navigate("/MainPage"), 1500);
     } catch (err) {
       console.log("ERROR RESPONSE:", err.response?.data || err.message); // 🔥 IMPORTANT
 
