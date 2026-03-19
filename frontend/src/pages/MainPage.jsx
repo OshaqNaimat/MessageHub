@@ -178,7 +178,7 @@ const MainPage = () => {
               {isDark ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
             </button>
             <img
-              src="https://ui-avatars.com/api/?name=Me&background=25D366&color=fff&size=40"
+              src="/logo.png"
               className="w-10 h-10 rounded-full"
               alt="avatar"
             />
