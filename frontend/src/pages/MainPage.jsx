@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaRegSquarePlus } from "react-icons/fa6";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { IoSearch } from "react-icons/io5";
@@ -6,91 +6,9 @@ import { FaArrowLeft } from "react-icons/fa";
 import { MdLightMode, MdDarkMode } from "react-icons/md";
 import SearchBar from "../components/SearchBar";
 import SideBar from "../components/SideBar";
+import axios from "axios";
 
 const FILTERS = ["All", "Unread", "Groups", "Favourites"];
-
-const CHATS = [
-  {
-    id: 1,
-    name: "Ali Hassan",
-    avatar:
-      "https://ui-avatars.com/api/?name=Ali+Hassan&background=E74C3C&color=fff&size=48",
-    lastMessage: "Sure, I'll send it over tonight 👍",
-    time: "12:45 PM",
-    unread: 3,
-    online: true,
-  },
-  {
-    id: 2,
-    name: "Sara Khan",
-    avatar:
-      "https://ui-avatars.com/api/?name=Sara+Khan&background=8E44AD&color=fff&size=48",
-    lastMessage: "Did you see the new update?",
-    time: "11:30 AM",
-    unread: 0,
-    online: true,
-  },
-  {
-    id: 3,
-    name: "Dev Team 🛠️",
-    avatar:
-      "https://ui-avatars.com/api/?name=Dev+Team&background=2980B9&color=fff&size=48",
-    lastMessage: "Ahmed: PR is ready for review",
-    time: "10:15 AM",
-    unread: 7,
-    online: false,
-  },
-  {
-    id: 4,
-    name: "Usman Tariq",
-    avatar:
-      "https://ui-avatars.com/api/?name=Usman+Tariq&background=27AE60&color=fff&size=48",
-    lastMessage: "Okay see you tomorrow!",
-    time: "Yesterday",
-    unread: 0,
-    online: false,
-  },
-  {
-    id: 5,
-    name: "Fatima Noor",
-    avatar:
-      "https://ui-avatars.com/api/?name=Fatima+Noor&background=F39C12&color=fff&size=48",
-    lastMessage: "Haha yes exactly 😂",
-    time: "Yesterday",
-    unread: 1,
-    online: true,
-  },
-  {
-    id: 6,
-    name: "Family 👨‍👩‍👧",
-    avatar:
-      "https://ui-avatars.com/api/?name=Family&background=16A085&color=fff&size=48",
-    lastMessage: "Ammi: Come home early beta",
-    time: "Mon",
-    unread: 0,
-    online: false,
-  },
-  {
-    id: 7,
-    name: "Hamza Malik",
-    avatar:
-      "https://ui-avatars.com/api/?name=Hamza+Malik&background=E67E22&color=fff&size=48",
-    lastMessage: "Bhai match dekhna hai?",
-    time: "Sun",
-    unread: 2,
-    online: false,
-  },
-  {
-    id: 8,
-    name: "Zara Siddiqui",
-    avatar:
-      "https://ui-avatars.com/api/?name=Zara+Siddiqui&background=C0392B&color=fff&size=48",
-    lastMessage: "Thanks for the help! 🙏",
-    time: "Sat",
-    unread: 0,
-    online: true,
-  },
-];
 
 const themes = {
   dark: {
@@ -133,6 +51,8 @@ const MainPage = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedChat, setSelectedChat] = useState(null); // ✅ tracks which chat is open
   const [isDark, setIsDark] = useState(true);
+  const [chats, setChats] = useState([]);
+
   const t = isDark ? themes.dark : themes.light;
 
   const chatOpen = selectedChat !== null; // ✅ derived — no separate state needed
@@ -144,7 +64,22 @@ const MainPage = () => {
   const handleCloseChat = () => {
     setSelectedChat(null);
   };
+  // get all the users
 
+  const myUser = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5174/api/auth/get-all-users",
+      );
+      setChats(response.data); // ✅ called AFTER await resolves
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+    }
+  };
+
+  useEffect(() => {
+    myUser();
+  }, []);
   return (
     <div className="h-screen flex overflow-hidden" style={{ background: t.bg }}>
       {/* ── SIDEBAR ── */}
@@ -177,11 +112,7 @@ const MainPage = () => {
             >
               {isDark ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
             </button>
-            <img
-              src="/logo.png"
-              className="w-10 h-10 rounded-full"
-              alt="avatar"
-            />
+
             <h4
               className="font-semibold text-base hidden lg:block"
               style={{ color: t.text }}
@@ -253,7 +184,7 @@ const MainPage = () => {
 
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto scrollHide">
-          {CHATS.map((chat) => (
+          {chats.map((chat) => (
             <div
               key={chat.id}
               onClick={() => handleSelectChat(chat)}
@@ -276,7 +207,7 @@ const MainPage = () => {
               {/* Avatar + online dot */}
               <div className="relative flex-shrink-0">
                 <img
-                  src={chat.avatar}
+                  src="https://cdn-icons-png.flaticon.com/256/149/149071.png"
                   className="w-12 h-12 rounded-full"
                   alt={chat.name}
                 />
@@ -302,11 +233,13 @@ const MainPage = () => {
                     style={{ color: chat.unread > 0 ? "#25D366" : t.subtext }}
                   >
                     {chat.time}
+                    Time
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-0.5">
                   <p className="text-sm truncate" style={{ color: t.subtext }}>
                     {chat.lastMessage}
+                    last messege
                   </p>
                   {chat.unread > 0 && (
                     <span
@@ -314,6 +247,7 @@ const MainPage = () => {
                       style={{ background: "#25D366" }}
                     >
                       {chat.unread}
+                      unread
                     </span>
                   )}
                 </div>
@@ -351,7 +285,7 @@ const MainPage = () => {
             {/* ✅ Dynamic avatar */}
             <div className="relative">
               <img
-                src={selectedChat.avatar}
+                src="https://cdn-icons-png.flaticon.com/256/149/149071.png"
                 className="w-10 h-10 rounded-full"
                 alt={selectedChat.name}
               />
@@ -402,23 +336,25 @@ const MainPage = () => {
               style={{ background: t.msgIn, color: t.text }}
             >
               {selectedChat.lastMessage}
+              Receiver Messege
               <span
                 className="block text-xs mt-1 text-right"
                 style={{ color: t.subtext }}
               >
                 {selectedChat.time}
+                Time
               </span>
             </div>
             <div
               className="self-end max-w-xs lg:max-w-md text-sm px-3 py-2 rounded-lg rounded-tr-none shadow"
               style={{ background: t.msgOut, color: t.text }}
             >
-              Sure! Talk to you later 👋
+              Sender Messege 👋
               <span
                 className="block text-xs mt-1 text-right"
                 style={{ color: t.subtext }}
               >
-                {selectedChat.time} ✓✓
+                {selectedChat.time} Time ✓✓
               </span>
             </div>
           </div>

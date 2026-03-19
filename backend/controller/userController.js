@@ -216,3 +216,10 @@ export const verifyOTP = async (req, res) => {
 
   res.send(findUser);
 };
+
+// get all users
+
+export const getAllUsers = async (req, res) => {
+  let allUsers = await User.find({ emailVerified: true });
+  res.send(allUsers);
+};
