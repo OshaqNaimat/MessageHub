@@ -251,7 +251,7 @@ export default function OTPVerification() {
                   padding: "4px 16px",
                 }}
               >
-                +92 *** *** 7821
+                Email
               </span>
             </div>
 
