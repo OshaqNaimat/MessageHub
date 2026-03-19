@@ -10,6 +10,7 @@ export default function OTPVerification() {
   const [countdown, setCountdown] = useState(30);
   const inputRefs = useRef([]);
   const timerRef = useRef(null);
+  const otpRef = useRef(""); // ✅ Fix: ref to always hold latest OTP
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,19 +33,26 @@ export default function OTPVerification() {
   const handleChange = (e, idx) => {
     const val = e.target.value.replace(/\D/g, "");
     if (!val && e.nativeEvent.inputType !== "deleteContentBackward") return;
-    const newOtp = otp.split("");
+
+    const newOtp = otpRef.current.split(""); // ✅ use ref, not stale state
     while (newOtp.length < 4) newOtp.push("");
     newOtp[idx] = val ? val[0] : "";
-    setOtp(newOtp.join(""));
+    const updated = newOtp.join("");
+
+    otpRef.current = updated; // ✅ sync ref immediately
+    setOtp(updated);
     setError("");
+
     if (val && idx < 3) inputRefs.current[idx + 1]?.focus();
   };
 
   const handleKeyDown = (e, idx) => {
-    if (e.key === "Backspace" && !otp[idx] && idx > 0) {
-      const newOtp = otp.split("");
+    if (e.key === "Backspace" && !otpRef.current[idx] && idx > 0) {
+      const newOtp = otpRef.current.split(""); // ✅ use ref
       newOtp[idx - 1] = "";
-      setOtp(newOtp.join(""));
+      const updated = newOtp.join("");
+      otpRef.current = updated; // ✅ sync ref
+      setOtp(updated);
       inputRefs.current[idx - 1]?.focus();
     }
   };
@@ -56,7 +64,9 @@ export default function OTPVerification() {
       .replace(/\D/g, "")
       .slice(0, 4);
     if (!paste) return;
-    setOtp(paste.padEnd(4, "").slice(0, 4));
+    const updated = paste.padEnd(4, "").slice(0, 4);
+    otpRef.current = updated; // ✅ sync ref
+    setOtp(updated);
     inputRefs.current[Math.min(paste.length, 3)]?.focus();
   };
 
@@ -64,20 +74,40 @@ export default function OTPVerification() {
   const email = convertedData?.email || "";
 
   const handleVerify = async () => {
-    if (otp.length < 4) {
+    const currentOtp = otpRef.current.trim();
+
+    // console.log("Sending:", { email, otp: currentOtp }); // 🔍 DEBUG
+
+    if (currentOtp.length < 4) {
       setError("Please enter all 4 digits.");
       return;
     }
+
     try {
       const response = await axios.post(
-        "http://localhost:5174/api/auth/otp-verification",
-        { otp, email },
+        "http://localhost:5174/api/auth/otpVerification",
+        {
+          otp: String(currentOtp), // ✅ force string
+          email: email?.trim(), // ✅ safe email
+        },
       );
-      console.log(response);
+
+      console.log("SUCCESS RESPONSE:", response.data); // 🔍 DEBUG
+
       setVerified(true);
+      navigate("/MainPage");
+
+      localStorage.setItem("user", JSON.stringify(response.data));
     } catch (err) {
-      setError("Incorrect code. Please try again.");
+      console.log("ERROR RESPONSE:", err.response?.data || err.message); // 🔥 IMPORTANT
+
+      setError(
+        err.response?.data?.message || "Incorrect code. Please try again.",
+      );
+
+      otpRef.current = "";
       setOtp("");
+
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
     }
   };
@@ -168,11 +198,16 @@ export default function OTPVerification() {
         }}
       >
         {/* Back Arrow */}
-        <div className="text-white mb-4" onClick={() => navigate("/")}>
-          <span className="[background:linear-gradient(135deg,#25D366,#128C7E)] [background-clip:text] [-webkit-background-clip:text] [color:transparent] inline-flex cursor-pointer transition-all duration-300 hover:-translate-y-0.5 [filter:drop-shadow(0_0_6px_rgba(37,211,102,0.5))] hover:[filter:drop-shadow(0_0_12px_rgba(37,211,102,0.7))]">
-            <FaArrowLeft />
-          </span>
-        </div>
+        <span
+          onClick={() => navigate("/")}
+          className="inline-flex cursor-pointer transition-all duration-300 hover:-translate-y-0.5"
+          style={{
+            filter: "drop-shadow(0 0 6px rgba(37,211,102,0.5))",
+            color: "#25D366",
+          }}
+        >
+          <FaArrowLeft />
+        </span>
 
         {!verified ? (
           <>
@@ -278,6 +313,30 @@ export default function OTPVerification() {
             >
               Verify & Continue
             </button>
+
+            {/* Resend */}
+            <p
+              style={{
+                textAlign: "center",
+                color: "rgba(255,255,255,0.35)",
+                fontSize: 13,
+                marginTop: 16,
+              }}
+            >
+              {countdown > 0 ? (
+                <>
+                  Resend code in{" "}
+                  <span style={{ color: "#25D366" }}>{countdown}s</span>
+                </>
+              ) : (
+                <span
+                  style={{ color: "#25D366", cursor: "pointer" }}
+                  onClick={startTimer}
+                >
+                  Resend Code
+                </span>
+              )}
+            </p>
           </>
         ) : (
           /* Success State */

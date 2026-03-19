@@ -217,7 +217,7 @@ export default function WhatsAppRegister() {
 
             <button
               onClick={handleRegister}
-              className="submit-btn w-full text-white font-bold py-4 rounded-xl text-base mt-2"
+              className="submit-btn w-full text-white cursor-pointer font-bold py-4 rounded-xl text-base mt-2"
               style={{ letterSpacing: "0.5px" }}
             >
               Create Account
